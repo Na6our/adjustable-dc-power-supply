@@ -181,11 +181,14 @@ The heatsink and the pot above aren't available in Jordan, so for a test build I
 |---|---|---|
 | Heatsink | Assmann V6560W, 10 K/W, soldered to the PCB | Clip-on TO-220 heatsink, 15 × 10 × 20 mm (Mikroelectron ME-13388), no pins |
 | Pot | 2 kΩ, Alps RK09K panel-style | 1 kΩ multi-turn trimmer (3296W-style) |
-| R1 | 240 Ω | 120 Ω, so the 1 kΩ pot still gives 1.25 to 11.7 V |
+| R1 | 240 Ω | 100 Ω (120 Ω wasn't available) |
+| Output range | 1.25 to 11.8 V | 1.25 V up to about 12.5 V regulated; the pot's last turns go past what 15 V in can regulate |
 | Max dissipation | 5.7 W | about 2.8 W |
 | Max current | 0.41 A at 1.25 V, 1 A from 9.3 V | 0.21 A at 1.25 V, 0.86 A at 11.7 V |
 
-The cost is power handling. The clip-on heatsink has no published rating, and heatsinks that size are typically around 20 to 25 °C/W. Assuming 25 °C/W, the regulator can only get rid of about half as much heat, so the current it can deliver drops by about half at every output voltage, and 1 A is no longer reachable. Regulation itself is unaffected: R1 and the pot keep the same ratio, and halving R1 doubles the divider current to 10.4 mA, which meets the LM317's worst-case minimum load.
+The cost is power handling. The clip-on heatsink has no published rating, and heatsinks that size are typically around 20 to 25 °C/W. Assuming 25 °C/W, the regulator can only get rid of about half as much heat, so the current it can deliver drops by about half at every output voltage, and 1 A is no longer reachable. Regulation itself is unaffected, and the lower R1 raises the divider current to 12.5 mA, which meets the LM317's worst-case 10 mA minimum load.
+
+With R1 = 100 Ω, full scale on the pot would be about 13.8 V. The dropout test showed the LM317 needs about 1.9 to 2.2 V (and a real part up to about 2.5 V), so from a 15 V input it only regulates up to roughly 12.5 V. Above that the output just follows the input, so the top of the pot's range is avoided. 120 Ω would have kept the full range usable (11.7 V max), but I couldn't source one.
 
 ![Build variant layout](images/build_pcb_layout.png)
 
@@ -197,7 +200,7 @@ The cost is power handling. The clip-on heatsink has no published rating, and he
 
 ## Next steps
 
-- [ ] Re-run the output range simulation for the build variant (R1 = 120 Ω, 1 kΩ pot)
+- [ ] Re-run the output range simulation for the build variant (R1 = 100 Ω, 1 kΩ pot) and find where it drops out
 - [ ] Order the build variant boards and parts, build and test against the simulation
 - [ ] If built: measure the heatsink's real thermal resistance
 
