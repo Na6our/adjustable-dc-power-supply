@@ -1,0 +1,104 @@
+(footprint "Heatsink_TO220_15x10"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 7.5 11.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "192d0d0c-dd7a-4bf8-a06e-e3743433c351")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "Heatsink_TO220_15x10"
+		(at 8.5 13 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "ccd38036-0655-43c3-b344-582d219b41af")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "382bfed2-11cd-4e9a-896f-ff5b288148fc")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c7055461-014d-4eea-b54b-acf89bc8cf18")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start 0 0)
+		(end 15 10)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "0c04d226-58eb-4eb9-8eb0-3e83c528c987")
+	)
+	(fp_rect
+		(start 0 0)
+		(end 15 10)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "fa332e81-ae26-4c4e-a5b6-a19d03a8989f")
+	)
+	(fp_rect
+		(start 0 0)
+		(end 15 10)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "36aa56d8-0bed-41b7-a579-6a7d641ef882")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 7.5 15 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "cee0787c-c8fe-484d-8723-ecf3c4c676bd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(embedded_fonts no)
+)
