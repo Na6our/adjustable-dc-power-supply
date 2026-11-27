@@ -9,8 +9,8 @@ A small bench supply built around the LM317: 15 V DC in, adjustable output, on a
 | | |
 |---|---|
 | Input | 15 V DC wall adapter |
-| Output | 1.25 V to 11.8 V |
-| Max current | 1 A above 9.3 V out, derated below that (see Thermal) |
+| Output | 1.25 V to 11.7 V |
+| Max current | 0.2 A at 1.25 V up to 0.86 A at 11.7 V, limited by the heatsink (see Thermal) |
 | Board | 40 × 40 mm |
 
 ## Repository
@@ -23,26 +23,28 @@ kicad/        schematic, PCB, custom footprint library and Gerbers
 
 ## Circuit
 
-The LM317 keeps 1.25 V between OUT and ADJ, so R1 carries a fixed 5.2 mA and R2 sets the output:
+The LM317 keeps 1.25 V between OUT and ADJ, so R1 carries a fixed current and the pot (RV1) sets the output:
 
 ```
-Vout = 1.25 V × (1 + R2/R1) + I_ADJ × R2
+Vout = 1.25 V × (1 + RV1/R1) + I_ADJ × RV1
 ```
 
 | Part | Value | Why |
 |---|---|---|
-| R1 | 240 Ω | Sets 5.2 mA through the divider, which also covers the LM317's minimum load current |
-| R2 | 2 kΩ pot | Output range. Limited to 2 kΩ because of dropout (see below) |
+| R1 | 120 Ω | Sets 10.4 mA through the divider, which meets the LM317's worst-case 10 mA minimum load current |
+| RV1 | 1 kΩ multi-turn trimmer | Sets the output. With R1 = 120 Ω, full scale is 11.7 V, below the dropout limit (see below) |
 | C1 | 0.1 µF | Input decoupling |
-| C2 | 10 µF | Output. 0.1 µF oscillated at 1 A in simulation |
-| C3 | 10 µF | ADJ bypass, improves ripple rejection |
+| C2 | 10 µF, 105 °C | Output. 0.1 µF oscillated at 1 A in simulation |
+| C3 | 10 µF, 105 °C | ADJ bypass, improves ripple rejection |
 | D1, D2 | 1N4002 | Give the capacitors a safe discharge path if the input or output is shorted (1N4148 in simulation) |
 
 ![Schematic](images/schematic.png)
 
 *Figure 1: KiCad schematic.*
 
-All measurements below were taken with LTspice `.meas` statements (screenshots of the logs are collapsed at the bottom).
+The simulations below were run with R1 = 240 Ω and the pot as R2 (up to 2.2 kΩ). I later changed to R1 = 120 Ω and a 1 kΩ pot, because a 1 kΩ trimmer was what I could buy locally. The ratio is the same, so the output voltages are unchanged, and the higher divider current only helps regulation at light load.
+
+All measurements were taken with LTspice `.meas` statements (screenshots of the logs are collapsed at the bottom).
 
 ## Results
 
@@ -125,7 +127,7 @@ Input ramped down from 18 V with the output set to 12.88 V.
 | 0.5 A | 2.05 V |
 | 1 A | 2.23 V |
 
-At 1 A the top setting needs 15.01 V in, and a real LM317 needs up to about 2.5 V. A 15 V adapter can't hold 12.9 V, so R2 is capped at 2 kΩ, giving 11.8 V max. That needs about 14.3 V at 1 A with real-world dropout, which still works if the adapter is 5 % low.
+At 1 A the top setting needs 15.01 V in, and a real LM317 needs up to about 2.5 V. A 15 V adapter can't hold 12.9 V, so the maximum is set to about 11.7 V (originally R2 = 2 kΩ with R1 = 240 Ω, now a 1 kΩ pot with R1 = 120 Ω). That needs about 14.2 V at 1 A with real-world dropout, which still works if the adapter is 5 % low.
 
 ![Dropout](images/lm317_dropout.png)
 
@@ -135,45 +137,50 @@ At 1 A the top setting needs 15.01 V in, and a real LM317 needs up to about 2.5 
 
 The LM317 dissipates (Vin − Vout) × I. Worst case is 13.75 W (1.25 V out at 1 A), which would need a heatsink much bigger than the board.
 
-Heatsink: Assmann WSW V6560W (DigiKey AE10901-ND), 10 K/W, stands upright with a 30 × 12 mm footprint. TI gives RθJC = 0.1 °C/W for the tab. I designed with a more conservative 4 °C/W plus 1 °C/W for the thermal pad, which limits dissipation to 5.7 W at 40 °C ambient. With TI's figure the junction would sit around 103 °C at that limit, leaving margin below 125 °C.
+I first designed around an Assmann WSW V6560W board-mount heatsink (10 K/W). With a conservative 4 °C/W junction to case (TI gives 0.1 °C/W) and 1 °C/W for the thermal pad, that allows 5.7 W at 40 °C ambient: 1 A from about 9.3 V out upwards.
+
+I couldn't get that heatsink in Jordan, so the board uses a small clip-on TO-220 heatsink instead (15 × 10 × 20 mm, Mikroelectron ME-13388). It has no published rating. Heatsinks that size are typically around 20 to 25 °C/W, so I assume 25 °C/W, which gives (125 − 40) / (4 + 1 + 25) ≈ 2.8 W:
 
 | Output | Max current |
 |---|---|
-| 1.25 V | 0.41 A |
-| 5 V | 0.57 A |
-| 9 V | 0.94 A |
-| 9.3 V and up | 1 A |
+| 1.25 V | 0.21 A |
+| 5 V | 0.28 A |
+| 9 V | 0.47 A |
+| 11.7 V | 0.86 A |
 
-Above these limits the LM317's thermal shutdown kicks in.
+Above these limits the LM317's thermal shutdown kicks in. If the board is ever built, measuring the heatsink's real thermal resistance would replace the 25 °C/W assumption.
 
-The TO-220 tab is connected to OUT, so the heatsink will sit at the output voltage. Its pins can't go to ground on the PCB.
+The TO-220 tab is connected to OUT, so the heatsink sits at the output voltage. It shouldn't touch anything grounded, like a metal case or a scope ground clip.
 
 ## PCB
 
 Two-layer, 40 × 40 mm, all through-hole so it can be hand-soldered. Layout choices:
 
-- The heatsink sits along the top edge with the LM317 standing against its flat face. Everything else is arranged around that pair.
+- The LM317 sits along the top with the clip-on heatsink behind its tab. The heatsink has no pins, so its footprint is just an outline that keeps the space clear.
 - Input comes in on the right (J1), straight into C1 and the LM317's IN pin. Output leaves on the left (J2) on a direct track from the OUT pin.
 - R1 sits right under the LM317 with its own track to the OUT pin, so load current doesn't flow through the feedback path. The datasheet asks for this.
 - IN, OUT and GND use 1.0 mm tracks (about 0.3 mm would do for 1 A on 1 oz copper). ADJ uses 0.5 mm.
 - The bottom layer is a solid GND pour, so ground needs no tracks.
-- The heatsink's pins are on the OUT net, since the LM317's tab is connected to OUT. That keeps the ground pour clear of them.
+- The output is set with a multi-turn trimmer (3296W-style), adjusted with a screwdriver.
 - Two M3 mounting holes along the bottom edge.
 
-The heatsink footprint (Assmann V6560W) isn't in KiCad's library, so I drew it from the datasheet drawing (ASS 0595 HS): pins 25.4 mm apart, Ø 2.7 mm holes, 30 × 12 mm outline.
+![PCB layout](images/pcb_layout.png)
 
-Changes from the simulation: the protection diodes are 1N4002 instead of 1N4148, because on a real board they have to carry the capacitors' discharge current, and the datasheet suggests 1N4002-type parts. C2 and C3 should be 105 °C electrolytics, since they sit close to the regulator.
+*Figure 10: PCB layout. Top copper in red, bottom GND pour in blue.*
+
+Changes from the simulation: the protection diodes are 1N4002 instead of 1N4148, because on a real board they have to carry the capacitors' discharge current, and the datasheet suggests 1N4002-type parts. C2 and C3 should be 105 °C electrolytics, since they sit close to the regulator. The heatsink and pot were swapped for parts available locally, as described above.
 
 ![3D render, top](images/pcb_3d_top.png)
 
-*Figure 10: 3D render, top. The heatsink has no 3D model, so only its outline shows.*
+*Figure 11: 3D render, top. The heatsink has no 3D model, so only its outline shows.*
 
 ![3D render, bottom](images/pcb_3d_bottom.png)
 
-*Figure 11: 3D render, bottom, with the ground pour and board label.*
+*Figure 12: 3D render, bottom, with the ground pour and board label.*
 
 ## Next steps
 
+- [ ] Re-run the output range simulation with R1 = 120 Ω and a 1 kΩ pot
 - [ ] Order boards and parts, build and test it against the simulation
 - [ ] If built: measure the heatsink's real thermal resistance
 
